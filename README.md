@@ -1,0 +1,1 @@
+This is a fullstack practice, using VueJS, echarts, NodeJS,and snowflake.

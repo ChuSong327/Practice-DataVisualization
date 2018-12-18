@@ -1,0 +1,22 @@
+{
+  "name": "practice-datavisualization",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChuSong327/Practice-DataVisualization.git"
+  },
+  "author": "chu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChuSong327/Practice-DataVisualization/issues"
+  },
+  "homepage": "https://github.com/ChuSong327/Practice-DataVisualization#readme",
+  "dependencies": {
+    "snowflake-sdk": "^1.1.9"
+  }
+}
