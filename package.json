@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/ChuSong327/Practice-DataVisualization#readme",
   "dependencies": {
-    "snowflake-sdk": "^1.1.9"
+    "echarts-gl": "^1.1.1",
+    "snowflake-sdk": "^1.1.9",
+    "vue": "^2.5.21"
   }
 }
