@@ -1,15 +1,23 @@
 const express = require("express");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const createError = require("http-errors");
 const snowFlake = require("./db/index");
 
 const app = express();
+const corsOptions = {
+    origin: "http:localhost:8080",
+    optionSuccessStatus: 200
+};
 
+app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/", (req,res) => {
+
+app.options("/", cors(corsOptions));
+app.get("/", cors(corsOptions), (req,res) => {
     snowFlake.connect((err, conn) => {
         if(err) {
             console.log("This is the err:", err);
@@ -18,12 +26,16 @@ app.get("/", (req,res) => {
         }
     });
     snowFlake.execute({
-        sqlText: "select billingcountry, count(1) from core_sales_state.vw_sf_account_latest group by 1 order by 2 desc limit 20",
+        sqlText: "select billingcountry, count(1) as count from core_sales_state.vw_sf_account_latest group by 1 order by 2 desc limit 20",
         complete: (err, stmt, rows) => {
             if(err) {
                 console.log("This is the error message:", err.message);
             } else {
                 console.log("Successfully executed statement:", stmt.getSqlText());
+                res.set({
+                    "Access-Control-Allow-Origin": "https://chattersquare.herokuapp.com/",
+                    "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
+                });
                 res.json(rows);
             }
         }
