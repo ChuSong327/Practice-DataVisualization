@@ -3,6 +3,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const createError = require("http-errors");
 const snowFlake = require("./db/index");
+const coreSalesTable = require('./config/table');
 
 const app = express();
 const corsOptions = {
@@ -26,7 +27,7 @@ app.get("/", cors(corsOptions), (req,res) => {
         }
     });
     snowFlake.execute({
-        sqlText: "select billingcountry, count(1) as count from core_sales_state.vw_sf_account_latest group by 1 order by 2 desc limit 20",
+        sqlText: `select billingcountry, count(1) as count from ${coreSalesTable} group by 1 order by 2 desc limit 20`,
         complete: (err, stmt, rows) => {
             if(err) {
                 console.log("This is the error message:", err.message);
