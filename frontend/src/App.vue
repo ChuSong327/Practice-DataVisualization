@@ -3,6 +3,7 @@
     <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Hello World"/>
     <PieChart/>
+    <TwoPieChart/>
   </div>
 </template>
 
@@ -10,12 +11,14 @@
 /* eslint-disable */
 import HelloWorld from './components/HelloWorld.vue'
 import PieChart from "./components/PieChart.vue"
+import TwoPieChart from "./components/TwoPieChart.vue"
 
 export default {
   name: 'app',
   components: {
     HelloWorld,
-    PieChart
+    PieChart,
+    TwoPieChart
   }
 }
 </script>
