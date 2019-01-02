@@ -67,7 +67,7 @@ app.get("/account-names", cors(corsOptions), (req, res) => {
     })
 })
 
-app.get("/:acctName", (req, res) => {
+app.get("/case/:acctName", (req, res) => {
     const accountName = req.params.acctName;
     snowFlake.execute({
         sqlText: `select acct.name as account_name
@@ -83,8 +83,7 @@ app.get("/:acctName", (req, res) => {
                     group by
                         acct.name
                         ,cs.severity__c
-                    order by 3 desc
-                    limit 1000;`,
+                    order by 3 desc;`,
         complete: (err, stmt, rows) => {
             if(err) {
                 console.log("This is the error message:", err.message);
@@ -98,7 +97,41 @@ app.get("/:acctName", (req, res) => {
             }
         }
     })
+});
+
+app.get("/contact/:acctName", (req, res) => {
+    const accountName = req.params.acctName;
+    snowFlake.execute({
+        sqlText: `select 
+                        acct.name as account_name
+                        ,cntct.type__c as contact_type
+                        ,count(distinct cntct.id) as contact_count
+                    from 
+                        core_sales_state.vw_sf_account_latest as acct
+                    inner join
+                        core_sales_state.vw_sf_contact_latest as cntct
+                        on acct.id = cntct.accountid
+                    where
+                        acct.name = '${ accountName }'
+                    group by
+                        acct.name
+                        ,cntct.type__c
+                    order by 1 asc;`,
+        complete: (err, stmt, rows) => {
+            if(err) {
+                console.log("This is the error message:", err.message);
+            } else {
+                console.log("Successfully executed statement:", stmt.getSqlText());
+                res.set({
+                    "Access-Control-Allow-Origin": "https://localhost:8080",
+                    "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
+                });
+                res.json(rows);
+            }
+        }
+    }) 
 })
+
 
 //Handle Errors
 app.use((req, res, next) => {
