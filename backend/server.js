@@ -18,7 +18,7 @@ app.use(cookieParser());
 
 
 app.options("/", cors(corsOptions));
-app.get("/", cors(corsOptions), (req,res) => {
+app.get("/getPieData", cors(corsOptions), (req,res) => {
     snowFlake.connect((err, conn) => {
         if(err) {
             console.log("This is the err:", err);
@@ -34,7 +34,7 @@ app.get("/", cors(corsOptions), (req,res) => {
             } else {
                 console.log("Successfully executed statement:", stmt.getSqlText());
                 res.set({
-                    "Access-Control-Allow-Origin": "https://chattersquare.herokuapp.com/",
+                    "Access-Control-Allow-Origin": "https://localhost:8080",
                     "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
                 });
                 res.json(rows);
