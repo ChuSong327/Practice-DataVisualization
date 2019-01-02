@@ -17,8 +17,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-app.options("/", cors(corsOptions));
-app.get("/getPieData", cors(corsOptions), (req,res) => {
+app.options("/singlepiedata", cors(corsOptions));
+app.get("/singlepiedata", cors(corsOptions), (req,res) => {
     snowFlake.connect((err, conn) => {
         if(err) {
             console.log("This is the err:", err);
@@ -42,6 +42,32 @@ app.get("/getPieData", cors(corsOptions), (req,res) => {
         }
     })
 });
+
+app.options("/account-names", cors(corsOptions));
+app.get("/account-names", cors(corsOptions), (req, res) => {
+    snowFlake.connect((err, conn) => {
+        if(err) {
+            console.log("This is the err:", err);
+        } else {
+            console.log("Successfully connected as id:", snowFlake.getId());
+        }
+    });
+    snowFlake.execute({
+        sqlText: `select distinct acct.name as account_name from ${coreSalesTable} as acct limit 100`,
+        complete: (err, stmt, rows) => {
+            if(err) {
+                console.log("This is the error message:", err.message);
+            } else {
+                console.log("Successfully executed statement:", stmt.getSqlText());
+                res.set({
+                    "Access-Control-Allow-Origin": "https://localhost:8080",
+                    "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
+                });
+                res.json(rows);
+            }
+        }
+    })
+})
 
 app.use((req, res, next) => {
     next(createError(404));
