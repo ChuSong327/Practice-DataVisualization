@@ -51,24 +51,26 @@ app.get("/singlepiedata", cors(corsOptions), (req,res) => {
 app.options("/account-names", cors(corsOptions));
 app.get("/account-names", cors(corsOptions), (req, res) => {
     snowFlake.execute({
-        sqlText: `select distinct acct.name as account_name from ${coreSalesTable} as acct limit 100`,
+        sqlText: `select distinct acct.name as account_name from ${coreSalesTable} as acct order by acct.name limit 20000`,
         complete: (err, stmt, rows) => {
             if(err) {
                 console.log("This is the error message:", err.message);
             } else {
                 console.log("Successfully executed statement:", stmt.getSqlText());
-                res.set({
-                    "Access-Control-Allow-Origin": "https://localhost:8080",
-                    "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
-                });
+                // res.set({
+                //     "Access-Control-Allow-Origin": "https://localhost:8080",
+                //     "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
+                // });
                 res.json(rows);
             }
         }
     })
 })
 
-app.get("/case/:acctName", (req, res) => {
+app.options("/account-names", cors(corsOptions));
+app.get("/case/:acctName", cors(corsOptions), (req, res) => {
     const accountName = req.params.acctName;
+
     snowFlake.execute({
         sqlText: `select acct.name as account_name
                         ,cs.severity__c as case_severity
@@ -101,6 +103,7 @@ app.get("/case/:acctName", (req, res) => {
 
 app.get("/contact/:acctName", (req, res) => {
     const accountName = req.params.acctName;
+
     snowFlake.execute({
         sqlText: `select 
                         acct.name as account_name

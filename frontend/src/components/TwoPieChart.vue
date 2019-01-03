@@ -4,6 +4,7 @@
         <select name="account" id="account-names">
             <option v-for="(account, index) in accountNames" :key="index" :index="index">{{ account.acctName }}</option>
         </select>
+        <button v-on:click="updateData">Update</button>
     </div>
 </template>
 
@@ -14,7 +15,9 @@ export default {
     name: "TwoPieChart",
     data() {
         return {
-            accountNames: []
+            accountNames: [],
+            casesByAccount:[],
+            contactsByAccount:[]
         }
     },
     created(){
@@ -26,6 +29,18 @@ export default {
         }).then(() => {
             console.log("this is the accountNames:", this.accountNames);
         })
+    },
+    methods: {
+        updateData: () => {
+            const acctName = document.querySelector("#account-names").value;
+            DataUtil.getCaseByAccountName(acctName).then(res => {
+                console.log("this is the case data:", res.data);
+            });
+            DataUtil.getContactByAccountName(acctName).then(res => {
+                console.log("this is the contact data:", res.data);
+            });
+        }
     }
+
 }
 </script>
