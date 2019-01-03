@@ -17,7 +17,9 @@ export default {
     created() {
         DataUtil.getData().then(res => {
             res.map(el => {
-                this.pieData.push({name: el.BILLINGCOUNTRY, value: el.COUNT});
+                this.pieData.push({
+                    name: el.BILLINGCOUNTRY, 
+                    value: el.COUNT});
                 return this.pieData;
             });
         }).then(() =>{

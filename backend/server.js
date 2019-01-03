@@ -3,18 +3,19 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const createError = require("http-errors");
 const snowFlake = require("./db/index");
-const coreSalesTable = require('./config/table');
+const tables = require('./config/table');
 
 const app = express();
 
 //CORS setting 
 const corsOptions = {
     origin: "http:localhost:8080",
-    optionSuccessStatus: 200
+    optionSuccessStatus: 200,
+    credentials: true
 };
 
 //Use Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(cookieParser());
@@ -32,7 +33,7 @@ snowFlake.connect((err, conn) => {
 app.options("/singlepiedata", cors(corsOptions));
 app.get("/singlepiedata", cors(corsOptions), (req,res) => {
     snowFlake.execute({
-        sqlText: `select billingcountry, count(1) as count from ${coreSalesTable} group by 1 order by 2 desc limit 20`,
+        sqlText: `select billingcountry, count(1) as count from ${tables.coreSalesAccount} group by 1 order by 2 desc limit 20`,
         complete: (err, stmt, rows) => {
             if(err) {
                 console.log("This is the error message:", err.message);
@@ -51,16 +52,27 @@ app.get("/singlepiedata", cors(corsOptions), (req,res) => {
 app.options("/account-names", cors(corsOptions));
 app.get("/account-names", cors(corsOptions), (req, res) => {
     snowFlake.execute({
-        sqlText: `select distinct acct.name as account_name from ${coreSalesTable} as acct order by acct.name limit 20000`,
+        sqlText: `select distinct
+                        acct.name as account_name
+                    from 
+                        ${tables.coreSalesAccount} as acct
+                    inner join
+                        ${tables.coreSalesContact} as contact
+                        on contact.accountid = acct.id
+                    inner join 
+                        ${tables.coreSalesCase} as cases
+                        on cases.accountid = acct.id
+                    order by acct.name
+                    limit 50000;`,
         complete: (err, stmt, rows) => {
             if(err) {
                 console.log("This is the error message:", err.message);
             } else {
                 console.log("Successfully executed statement:", stmt.getSqlText());
-                // res.set({
-                //     "Access-Control-Allow-Origin": "https://localhost:8080",
-                //     "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
-                // });
+                res.set({
+                    "Access-Control-Allow-Origin": "https://localhost:8080",
+                    "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE "
+                });
                 res.json(rows);
             }
         }
@@ -70,15 +82,14 @@ app.get("/account-names", cors(corsOptions), (req, res) => {
 app.options("/account-names", cors(corsOptions));
 app.get("/case/:acctName", cors(corsOptions), (req, res) => {
     const accountName = req.params.acctName;
-
     snowFlake.execute({
         sqlText: `select acct.name as account_name
                         ,cs.severity__c as case_severity
                         ,count(distinct cs.casenumber) as case_count
                     from 
-                        core_sales_state.vw_sf_account_latest as acct
+                        ${tables.coreSalesAccount} as acct
                     inner join
-                        core_sales_state.vw_sf_case_latest as cs
+                        ${tables.coreSalesCase} as cs
                         on acct.id = cs.accountid
                     where
                         acct.name like '${ accountName }'
@@ -103,16 +114,15 @@ app.get("/case/:acctName", cors(corsOptions), (req, res) => {
 
 app.get("/contact/:acctName", (req, res) => {
     const accountName = req.params.acctName;
-
     snowFlake.execute({
         sqlText: `select 
                         acct.name as account_name
                         ,cntct.type__c as contact_type
                         ,count(distinct cntct.id) as contact_count
                     from 
-                        core_sales_state.vw_sf_account_latest as acct
+                        ${tables.coreSalesAccount} as acct
                     inner join
-                        core_sales_state.vw_sf_contact_latest as cntct
+                        ${tables.coreSalesContact} as cntct
                         on acct.id = cntct.accountid
                     where
                         acct.name = '${ accountName }'
